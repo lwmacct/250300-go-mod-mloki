@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/gorilla/websocket"
-	"github.com/lwmacct/250109-m-bdflow/module/v00/mlog"
+	"github.com/lwmacct/250300-go-mod-mlog/pkg/mlog"
 )
 
 type Client struct {

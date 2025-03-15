@@ -1,9 +1,9 @@
 package mloki
 
 import (
-	"github.com/lwmacct/250109-m-bdflow/module/v00/mloki/types/label_values"
-	"github.com/lwmacct/250109-m-bdflow/module/v00/mloki/types/query_range"
-	"github.com/lwmacct/250109-m-bdflow/module/v00/mloki/types/tail"
+	"github.com/lwmacct/250300-go-mod-mloki/pkg/mloki/types/label_values"
+	"github.com/lwmacct/250300-go-mod-mloki/pkg/mloki/types/query_range"
+	"github.com/lwmacct/250300-go-mod-mloki/pkg/mloki/types/tail"
 )
 
 // GET /loki/api/v1/query_range
