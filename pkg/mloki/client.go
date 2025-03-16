@@ -15,17 +15,80 @@ import (
 )
 
 type Client struct {
-	Conf  *clientConf
+	Err   error
 	resty *resty.Client
-}
-
-// clientConf 客户端配置
-type clientConf struct {
-	Err error
 }
 
 // clientOpts 客户端选项
 type clientOpts func(*Client)
+
+// NewClient 创建客户端
+func NewClient(baseUrl string, opts ...clientOpts) *Client {
+	c := &Client{
+		resty: resty.New(),
+	}
+
+	{
+		// 设置 resty 配置
+		c.resty.SetTimeout(30 * time.Second)
+		c.resty.SetDisableWarn(true)
+		c.resty.SetBaseURL(baseUrl)
+	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
+}
+
+// WithClientBasicAuth 设置基本认证
+func WithClientBasicAuth(username, password string) clientOpts {
+	return func(c *Client) {
+		c.resty.SetBasicAuth(username, password)
+	}
+}
+
+// WithClientBearerAuth 设置 Bearer 认证
+func WithClientBearerAuth(token string) clientOpts {
+	return func(c *Client) {
+		c.resty.SetHeader("Authorization", "Bearer "+token)
+	}
+}
+
+// WithClientHeader 设置请求头
+func WithClientHeader(key, value string) clientOpts {
+	return func(c *Client) {
+		c.resty.SetHeader(key, value)
+	}
+}
+
+// WithClientDebug 设置 debug
+func WithClientDebug(debug bool) clientOpts {
+	return func(c *Client) {
+		c.resty.SetDebug(debug)
+	}
+}
+
+// WithClientDisableWarn 设置禁用警告
+func WithClientDisableWarn(disableWarn bool) clientOpts {
+	return func(c *Client) {
+		c.resty.SetDisableWarn(disableWarn)
+	}
+}
+
+// WithClientTimeout 设置超时时间
+func WithClientTimeout(timeout time.Duration) clientOpts {
+	return func(c *Client) {
+		c.resty.SetTimeout(timeout)
+	}
+}
+
+// WithClientRetry 设置重试次数
+func WithClientRetry(retry int) clientOpts {
+	return func(c *Client) {
+		c.resty.SetRetryCount(retry)
+	}
+}
 
 // QueryRange 查询范围
 func (t *Client) QueryRange(queryParams map[string]string) (*TsQueryRange, error) {
@@ -197,73 +260,4 @@ func (t *Client) LabelValues(label string, queryParams ...map[string]string) ([]
 		SetResult(resp).
 		Get(fmt.Sprintf("/loki/api/v1/label/%s/values", label))
 	return resp.Data, err
-}
-
-// NewClient 创建客户端
-func NewClient(baseUrl string, opts ...clientOpts) *Client {
-	c := &Client{
-		Conf:  &clientConf{},
-		resty: resty.New(),
-	}
-
-	{
-		// 设置 resty 配置
-		c.resty.SetTimeout(30 * time.Second)
-		c.resty.SetDisableWarn(true)
-		c.resty.SetBaseURL(baseUrl)
-	}
-
-	for _, opt := range opts {
-		opt(c)
-	}
-	return c
-}
-
-// WithClientBasicAuth 设置基本认证
-func WithClientBasicAuth(username, password string) clientOpts {
-	return func(c *Client) {
-		c.resty.SetBasicAuth(username, password)
-	}
-}
-
-// WithClientBearerAuth 设置 Bearer 认证
-func WithClientBearerAuth(token string) clientOpts {
-	return func(c *Client) {
-		c.resty.SetHeader("Authorization", "Bearer "+token)
-	}
-}
-
-// WithClientHeader 设置请求头
-func WithClientHeader(key, value string) clientOpts {
-	return func(c *Client) {
-		c.resty.SetHeader(key, value)
-	}
-}
-
-// WithClientDebug 设置 debug
-func WithClientDebug(debug bool) clientOpts {
-	return func(c *Client) {
-		c.resty.SetDebug(debug)
-	}
-}
-
-// WithClientDisableWarn 设置禁用警告
-func WithClientDisableWarn(disableWarn bool) clientOpts {
-	return func(c *Client) {
-		c.resty.SetDisableWarn(disableWarn)
-	}
-}
-
-// WithClientTimeout 设置超时时间
-func WithClientTimeout(timeout time.Duration) clientOpts {
-	return func(c *Client) {
-		c.resty.SetTimeout(timeout)
-	}
-}
-
-// WithClientRetry 设置重试次数
-func WithClientRetry(retry int) clientOpts {
-	return func(c *Client) {
-		c.resty.SetRetryCount(retry)
-	}
 }
